@@ -28,7 +28,7 @@ docker exec -i $CONTAINER_NAME mkdir -p $SQL_SCRIPT_DIR
 
 # Tworzenie bazy danych (jeśli nie istnieje) i tabel
 echo "Tworzenie bazy danych i tabel..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -C"
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -C -Q "
 IF DB_ID('$DB_NAME') IS NULL
     CREATE DATABASE [$DB_NAME];
 USE [$DB_NAME];
@@ -77,7 +77,7 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/da
 
 # Import danych z plików CSV
 echo "Importowanie danych z plików CSV..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C"
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
 BULK INSERT dane_osobowe
 FROM '$SQL_SCRIPT_DIR/dane_osobowe.csv'
 WITH (
