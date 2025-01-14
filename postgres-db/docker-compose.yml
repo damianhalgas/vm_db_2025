@@ -1,15 +1,14 @@
 ---
-version: "3.8"
-postgres: null
+version: '3.8'
+postgres:
 image: postgres:latest
 container_name: post-container
 restart: no
-environment: null
+environment:
 POSTGRES_USER: myuser
 POSTGRES_PASSWORD: mypassword
 POSTGRES_DB: mydatabase
 ports:
-  - 5432:5432
+  - '5432:5432'
 volumes:
   - ./data:/var/lib/postgressql/data
-
