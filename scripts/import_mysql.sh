@@ -31,7 +31,8 @@ USE $DB_NAME;
 CREATE TABLE IF NOT EXISTS dane_osobowe (
     osoba_id CHAR(36) PRIMARY KEY,  -- UUID jako klucz główny
     imie VARCHAR(60),
-    nazwisko VARCHAR(60)
+    nazwisko VARCHAR(60),
+    data_urodzenia DATE  -- Dodano pole data_urodzenia
 );
 
 CREATE TABLE IF NOT EXISTS dane_kontaktowe (
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS dane_kontaktowe (
     numer_domu VARCHAR(60),
     miasto VARCHAR(60),
     kod_pocztowy VARCHAR(60),
+    kraj VARCHAR(60),  -- Dodano pole kraj
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 
@@ -51,6 +53,7 @@ CREATE TABLE IF NOT EXISTS dane_firmowe (
     osoba_id CHAR(36),  -- UUID jako klucz obcy
     nazwa_firmy VARCHAR(150),
     stanowisko VARCHAR(255),
+    branza VARCHAR(100),  -- Dodano pole branza
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 EOF
@@ -65,21 +68,21 @@ INTO TABLE dane_osobowe
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(osoba_id, imie, nazwisko);
+(osoba_id, imie, nazwisko, data_urodzenia);
 
 LOAD DATA INFILE '$CSV_TARGET_DIR/dane_kontaktowe.csv'
 INTO TABLE dane_kontaktowe
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(osoba_id, email, telefon, ulica, numer_domu, miasto, kod_pocztowy);
+(osoba_id, email, telefon, ulica, numer_domu, miasto, kod_pocztowy, kraj);
 
 LOAD DATA INFILE '$CSV_TARGET_DIR/dane_firmowe.csv'
 INTO TABLE dane_firmowe
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(osoba_id, nazwa_firmy, stanowisko);
+(osoba_id, nazwa_firmy, stanowisko, branza);
 EOF
 
 echo "Import zakończony pomyślnie!"
