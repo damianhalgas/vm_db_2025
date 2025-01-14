@@ -36,17 +36,4 @@ CREATE TABLE IF NOT EXISTS dane_firmowe (
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 
--- Wyszukiwanie osoby i jej danych w innych tabelach
-DELIMITER $$
-CREATE PROCEDURE find_person (IN first_name VARCHAR(60), IN last_name VARCHAR(60))
-BEGIN
-    SELECT o.osoba_id, o.imie, o.nazwisko, 
-           k.email, k.telefon, 
-           f.nazwa_firmy, f.stanowisko
-    FROM dane_osobowe o
-    LEFT JOIN dane_kontaktowe k ON o.osoba_id = k.osoba_id
-    LEFT JOIN dane_firmowe f ON o.osoba_id = f.osoba_id
-    WHERE o.imie = first_name AND o.nazwisko = last_name;
-END$$
-DELIMITER ;
 EOF
