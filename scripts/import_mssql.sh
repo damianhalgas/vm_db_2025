@@ -45,7 +45,6 @@ END;
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_kontaktowe' AND xtype='U')
 BEGIN
    CREATE TABLE dane_kontaktowe (
-       kontakt_id INT PRIMARY KEY,
        osoba_id UNIQUEIDENTIFIER,
        email VARCHAR(100),
        telefon VARCHAR(60),
@@ -61,7 +60,6 @@ END;
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_firmowe' AND xtype='U')
 BEGIN
    CREATE TABLE dane_firmowe (
-       firma_id INT PRIMARY KEY,
        osoba_id UNIQUEIDENTIFIER,
        nazwa_firmy VARCHAR(150),
        stanowisko VARCHAR(255),
