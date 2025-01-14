@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS dane_kontaktowe (
 CREATE TABLE IF NOT EXISTS dane_firmowe (
     osoba_id UUID,
     nazwa_firmy VARCHAR(100),
-    stanowisko VARCHAR(50),
+    stanowisko VARCHAR(100),
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 EOF
