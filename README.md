@@ -12,15 +12,19 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    ```bash
    git clone https://github.com/damianhalgas/vm_db_2025.git
    cd vm_db_2025
-2. Ustaw uprawnienia dla skryptów np.
+2. Uruchom kontener np. 
+   Przejdź do folderu wybranej bazy:
+   ```bash
+   sudo docker-compose up -d
+3. Ustaw uprawnienia dla skryptów np.
    ```bash
    chmod +x scripts/import_postgres.sh
-3. Sprawdź Uprawnienia docker
+4. Sprawdź Uprawnienia docker
    ```bash
    sudo groupadd docker
    sudo usermod -aG docker $USER
-4. Uruchom skrypty z folderu script np.
+5. Uruchom skrypty z folderu script np.
    Dla PostgreSQL
    ```bash
    ./scripts/import_postgres.sh
-5.
+6.
