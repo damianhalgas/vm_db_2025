@@ -45,6 +45,7 @@ END;
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_kontaktowe' AND xtype='U')
 BEGIN
     CREATE TABLE dane_kontaktowe (
+        kontakt_id INT IDENTITY PRIMARY KEY,
         osoba_id UNIQUEIDENTIFIER,
         email VARCHAR(100),
         telefon VARCHAR(60),
@@ -60,6 +61,7 @@ END;
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_firmowe' AND xtype='U')
 BEGIN
     CREATE TABLE dane_firmowe (
+        firma_id INT IDENTITY PRIMARY KEY,
         osoba_id UNIQUEIDENTIFIER,
         nazwa_firmy VARCHAR(150),
         stanowisko VARCHAR(255),
@@ -76,56 +78,50 @@ docker cp "$CSV_SOURCE_DIR/dane_kontaktowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR
 docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_firmowe.csv"
 
 # Import data from CSV files
-echo "Importowanie danych z plików CSV..."
+echo "Importing data from CSV files..."
 docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
--- Wyłącz tymczasowo sprawdzanie kluczy obcych
+-- Disable foreign key constraints temporarily
 ALTER TABLE dane_kontaktowe NOCHECK CONSTRAINT ALL;
 ALTER TABLE dane_firmowe NOCHECK CONSTRAINT ALL;
 
--- Import danych
+-- Import data
 BULK INSERT dane_osobowe
 FROM '$SQL_SCRIPT_DIR/dane_osobowe.csv'
 WITH (
-    FORMAT = 'CSV',
-    FIRSTROW = 2,
     FIELDTERMINATOR = ',',
     ROWTERMINATOR = '\n',
-    KEEPNULLS,
+    FIRSTROW = 2,
     TABLOCK
 );
 
 BULK INSERT dane_kontaktowe
 FROM '$SQL_SCRIPT_DIR/dane_kontaktowe.csv'
 WITH (
-    FORMAT = 'CSV',
-    FIRSTROW = 2,
     FIELDTERMINATOR = ',',
     ROWTERMINATOR = '\n',
-    KEEPNULLS,
+    FIRSTROW = 2,
     TABLOCK
 );
 
 BULK INSERT dane_firmowe
 FROM '$SQL_SCRIPT_DIR/dane_firmowe.csv'
 WITH (
-    FORMAT = 'CSV',
-    FIRSTROW = 2,
     FIELDTERMINATOR = ',',
     ROWTERMINATOR = '\n',
-    KEEPNULLS,
+    FIRSTROW = 2,
     TABLOCK
 );
 
--- Włącz z powrotem sprawdzanie kluczy obcych
+-- Re-enable foreign key constraints
 ALTER TABLE dane_kontaktowe WITH CHECK CHECK CONSTRAINT ALL;
 ALTER TABLE dane_firmowe WITH CHECK CHECK CONSTRAINT ALL;
 
--- Sprawdź liczby zaimportowanych rekordów
-SELECT 'dane_osobowe' as tabela, COUNT(*) as liczba_rekordow FROM dane_osobowe
+-- Verify record counts
+SELECT 'dane_osobowe' AS tabela, COUNT(*) AS liczba_rekordow FROM dane_osobowe
 UNION ALL
 SELECT 'dane_kontaktowe', COUNT(*) FROM dane_kontaktowe
 UNION ALL
 SELECT 'dane_firmowe', COUNT(*) FROM dane_firmowe;
 "
 
-echo "Import zakończony pomyślnie!"
+echo "Import completed successfully!"
