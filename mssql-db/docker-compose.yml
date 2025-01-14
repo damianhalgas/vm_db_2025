@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest  # Wersja MSSQL
+    container_name: mssql-container
+    ports:
+      - "1433:1433"  # Mapowanie portu
+    environment:
+      ACCEPT_EULA: "Y"  # Akceptacja licencji
+      SA_PASSWORD: "StrongPassword123!"  # Hasło administratora (musi spełniać wymogi)
+      MSSQL_PID: "Express"  # Edycja SQL Server (Express, Developer, Standard itp.)
+    volumes:
+      - mssql_data:/var/opt/mssql  # Dane bazy będą przechowywane lokalnie
+
+volumes:
+  mssql_data:
