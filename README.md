@@ -19,7 +19,7 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    ```bash
    sudo groupadd docker
    sudo usermod -aG docker $USER
-4. Uruchom skrypty z folderu script:
+4. Uruchom skrypty z folderu script np.
    Dla PostgreSQL
    ```bash
    ./scripts/import_postgres.sh
