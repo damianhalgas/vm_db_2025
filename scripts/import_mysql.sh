@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS dane_kontaktowe (
     email VARCHAR(100),
     telefon VARCHAR(50),
     ulica VARCHAR(100),
-    numer_domu VARCHAR(10),
+    numer_domu VARCHAR(20),
     miasto VARCHAR(50),
-    kod_pocztowy VARCHAR(20),
+    kod_pocztowy VARCHAR(50),
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 
