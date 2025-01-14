@@ -72,14 +72,14 @@ INTO TABLE dane_kontaktowe
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(osoba_id, email, telefon, ulica, numer_domu, miasto, kod_pocztowy);
+(email, telefon, ulica, numer_domu, miasto, kod_pocztowy);
 
 LOAD DATA INFILE '$CSV_TARGET_DIR/dane_firmowe.csv'
 INTO TABLE dane_firmowe
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(osoba_id, nazwa_firmy, stanowisko);
+(nazwa_firmy, stanowisko);
 EOF
 
 echo "Import zakończony pomyślnie!"
