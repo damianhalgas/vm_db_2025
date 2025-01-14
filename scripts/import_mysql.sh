@@ -29,13 +29,14 @@ CREATE DATABASE IF NOT EXISTS $DB_NAME;
 USE $DB_NAME;
 
 CREATE TABLE IF NOT EXISTS dane_osobowe (
-    osoba_id INT PRIMARY KEY,
+    osoba_id INT AUTO_INCREMENT PRIMARY KEY,
     imie VARCHAR(60),
     nazwisko VARCHAR(60)
 );
 
 CREATE TABLE IF NOT EXISTS dane_kontaktowe (
-    osoba_id INT PRIMARY KEY,
+    kontakt_id INT AUTO_INCREMENT PRIMARY KEY,
+    osoba_id INT,
     email VARCHAR(100),
     telefon VARCHAR(60),
     ulica VARCHAR(100),
@@ -46,7 +47,8 @@ CREATE TABLE IF NOT EXISTS dane_kontaktowe (
 );
 
 CREATE TABLE IF NOT EXISTS dane_firmowe (
-    osoba_id INT PRIMARY KEY,
+    firma_id INT AUTO_INCREMENT PRIMARY KEY,
+    osoba_id INT,
     nazwa_firmy VARCHAR(150),
     stanowisko VARCHAR(255),
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
@@ -63,7 +65,7 @@ INTO TABLE dane_osobowe
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(osoba_id, imie, nazwisko);
+(imie, nazwisko);
 
 LOAD DATA INFILE '$CSV_TARGET_DIR/dane_kontaktowe.csv'
 INTO TABLE dane_kontaktowe
