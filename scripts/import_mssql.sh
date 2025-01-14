@@ -78,8 +78,13 @@ docker cp "$CSV_SOURCE_DIR/dane_kontaktowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR
 docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_firmowe.csv"
 
 # Import data from CSV files
-echo "Importing data from CSV files..."
+echo "Importowanie danych z plików CSV..."
 docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
+-- Wyłącz tymczasowo sprawdzanie kluczy obcych
+ALTER TABLE dane_kontaktowe NOCHECK CONSTRAINT ALL;
+ALTER TABLE dane_firmowe NOCHECK CONSTRAINT ALL;
+
+-- Import danych
 BULK INSERT dane_osobowe
 FROM '$SQL_SCRIPT_DIR/dane_osobowe.csv'
 WITH (
@@ -112,6 +117,17 @@ WITH (
     KEEPNULLS,
     TABLOCK
 );
+
+-- Włącz z powrotem sprawdzanie kluczy obcych
+ALTER TABLE dane_kontaktowe WITH CHECK CHECK CONSTRAINT ALL;
+ALTER TABLE dane_firmowe WITH CHECK CHECK CONSTRAINT ALL;
+
+-- Sprawdź liczby zaimportowanych rekordów
+SELECT 'dane_osobowe' as tabela, COUNT(*) as liczba_rekordow FROM dane_osobowe
+UNION ALL
+SELECT 'dane_kontaktowe', COUNT(*) FROM dane_kontaktowe
+UNION ALL
+SELECT 'dane_firmowe', COUNT(*) FROM dane_firmowe;
 "
 
-echo "Import completed successfully!"
+echo "Import zakończony pomyślnie!"
