@@ -17,7 +17,7 @@ fi
 
 # Uruchomienie kontenera z MSSQL
 echo "Uruchamianie kontenera MSSQL..."
-docker-compose up -d
+docker-compose up -d $CONTAINER_NAME
 
 # Czekanie na pełne uruchomienie MSSQL
 echo "Czekanie na uruchomienie MSSQL..."
@@ -26,37 +26,47 @@ sleep 15  # Możesz zwiększyć czas, jeśli MSSQL potrzebuje więcej na start
 # Tworzenie katalogu na skrypty SQL w kontenerze
 docker exec -i $CONTAINER_NAME mkdir -p $SQL_SCRIPT_DIR
 
-# Tworzenie bazy danych i tabel
+# Tworzenie bazy danych (jeśli nie istnieje) i tabel
 echo "Tworzenie bazy danych i tabel..."
 docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -C -Q "
-CREATE DATABASE [$DB_NAME];
+IF DB_ID('$DB_NAME') IS NULL
+    CREATE DATABASE [$DB_NAME];
 USE [$DB_NAME];
-CREATE TABLE dane_osobowe (
-    osoba_id UNIQUEIDENTIFIER PRIMARY KEY,
-    imie NVARCHAR(60),
-    nazwisko NVARCHAR(60),
-    data_urodzenia DATE
-);
-CREATE TABLE dane_kontaktowe (
-    kontakt_id INT IDENTITY PRIMARY KEY,
-    osoba_id UNIQUEIDENTIFIER,
-    email NVARCHAR(100),
-    telefon NVARCHAR(60),
-    ulica NVARCHAR(100),
-    numer_domu NVARCHAR(60),
-    miasto NVARCHAR(60),
-    kod_pocztowy NVARCHAR(60),
-    kraj NVARCHAR(60),
-    FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
-);
-CREATE TABLE dane_firmowe (
-    firma_id INT IDENTITY PRIMARY KEY,
-    osoba_id UNIQUEIDENTIFIER,
-    nazwa_firmy NVARCHAR(150),
-    stanowisko NVARCHAR(255),
-    branza NVARCHAR(100),
-    FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
-);
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_osobowe' AND xtype='U')
+BEGIN
+    CREATE TABLE dane_osobowe (
+        osoba_id UNIQUEIDENTIFIER PRIMARY KEY,
+        imie NVARCHAR(60),
+        nazwisko NVARCHAR(60),
+        data_urodzenia DATE
+    );
+END;
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_kontaktowe' AND xtype='U')
+BEGIN
+    CREATE TABLE dane_kontaktowe (
+        kontakt_id INT IDENTITY PRIMARY KEY,
+        osoba_id UNIQUEIDENTIFIER,
+        email NVARCHAR(100),
+        telefon NVARCHAR(60),
+        ulica NVARCHAR(100),
+        numer_domu NVARCHAR(60),
+        miasto NVARCHAR(60),
+        kod_pocztowy NVARCHAR(60),
+        kraj NVARCHAR(60),
+        FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
+    );
+END;
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_firmowe' AND xtype='U')
+BEGIN
+    CREATE TABLE dane_firmowe (
+        firma_id INT IDENTITY PRIMARY KEY,
+        osoba_id UNIQUEIDENTIFIER,
+        nazwa_firmy NVARCHAR(150),
+        stanowisko NVARCHAR(255),
+        branza NVARCHAR(100),
+        FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
+    );
+END;
 "
 
 # Kopiowanie plików CSV do kontenera
