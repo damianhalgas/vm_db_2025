@@ -20,9 +20,7 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    sudo groupadd docker
    sudo usermod -aG docker $USER
 4. Uruchom skrypty z folderu script:
+   Dla PostgreSQL
    ```bash
-   git clone https://github.com/damianhalgas/vm_db_2025.git
-   cd vm_db_2025
-
-
-
+   ./scripts/import_postgres.sh
+5.
