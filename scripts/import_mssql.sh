@@ -4,7 +4,7 @@
 CONTAINER_NAME="mssql-container"
 DB_NAME="MyDatabase"
 SA_PASSWORD="StrongPassword123!"
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv"  # Lokalizacja plików CSV
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"  # Lokalizacja plików CSV
 SQL_SCRIPT_DIR="/tmp/sql_scripts"  # Skrypty SQL w kontenerze
 
 # Sprawdzenie, czy pliki CSV istnieją w źródłowej lokalizacji
