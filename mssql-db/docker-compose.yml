@@ -10,6 +10,7 @@ services:
       ACCEPT_EULA: "Y"  # Akceptacja licencji
       SA_PASSWORD: "StrongPassword123!"  # Hasło administratora (musi spełniać wymogi)
       MSSQL_PID: "Express"  # Edycja SQL Server (Express, Developer, Standard itp.)
+      MSSQL_DATABASE: "MyDatabase"  # Automatyczne tworzenie bazy danych
     volumes:
       - mssql_data:/var/opt/mssql  # Dane bazy będą przechowywane lokalnie
 
