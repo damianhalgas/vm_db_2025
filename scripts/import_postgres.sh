@@ -32,11 +32,11 @@ CREATE TABLE IF NOT EXISTS dane_osobowe (
 CREATE TABLE IF NOT EXISTS dane_kontaktowe (
     osoba_id UUID,
     email VARCHAR(100),
-    telefon VARCHAR(20),
+    telefon VARCHAR(50),
     ulica VARCHAR(100),
     numer_domu VARCHAR(10),
     miasto VARCHAR(50),
-    kod_pocztowy VARCHAR(10),
+    kod_pocztowy VARCHAR(20),
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 CREATE TABLE IF NOT EXISTS dane_firmowe (
