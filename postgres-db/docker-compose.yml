@@ -1,6 +1,6 @@
 version: '3.8'
   postgres:
-    image: postgres:lates
+    image: postgres:latest
     container_name: post-container
     restart: no
     environment:
