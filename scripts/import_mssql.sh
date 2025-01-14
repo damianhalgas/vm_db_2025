@@ -1,104 +1,117 @@
 #!/bin/bash
-
-# Zmienne konfiguracyjne
+# Configuration variables
 CONTAINER_NAME="mssql-container"
 DB_NAME="mydatabase"
 SA_PASSWORD="StrongPassword123!"
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"  # Lokalizacja plików CSV
-SQL_SCRIPT_DIR="/tmp/sql_scripts"  # Skrypty SQL w kontenerze
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
+SQL_SCRIPT_DIR="/tmp/sql_scripts"
 
-# Sprawdzenie, czy pliki CSV istnieją w źródłowej lokalizacji
+# Check if CSV files exist
 if [ ! -f "$CSV_SOURCE_DIR/dane_osobowe.csv" ] || \
    [ ! -f "$CSV_SOURCE_DIR/dane_kontaktowe.csv" ] || \
    [ ! -f "$CSV_SOURCE_DIR/dane_firmowe.csv" ]; then
-  echo "Błąd: Jeden lub więcej plików CSV nie istnieje w katalogu $CSV_SOURCE_DIR."
+  echo "Error: One or more CSV files don't exist in $CSV_SOURCE_DIR."
   exit 1
 fi
 
-# Uruchomienie kontenera z MSSQL
-echo "Uruchamianie kontenera MSSQL..."
+# Start MSSQL container
+echo "Starting MSSQL container..."
 docker-compose up -d $CONTAINER_NAME
 
-# Czekanie na pełne uruchomienie MSSQL
-echo "Czekanie na uruchomienie MSSQL..."
-sleep 15  # Możesz zwiększyć czas, jeśli MSSQL potrzebuje więcej na start
+# Wait for MSSQL to start
+echo "Waiting for MSSQL to start..."
+sleep 15
 
-# Tworzenie katalogu na skrypty SQL w kontenerze
+# Create directory for SQL scripts in container
 docker exec -i $CONTAINER_NAME mkdir -p $SQL_SCRIPT_DIR
 
-# Tworzenie bazy danych (jeśli nie istnieje) i tabel
-echo "Tworzenie bazy danych i tabel..."
+# Create database and tables
+echo "Creating database and tables..."
 docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -C -Q "
 IF DB_ID('$DB_NAME') IS NULL
     CREATE DATABASE [$DB_NAME];
 USE [$DB_NAME];
+
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_osobowe' AND xtype='U')
 BEGIN
     CREATE TABLE dane_osobowe (
         osoba_id UNIQUEIDENTIFIER PRIMARY KEY,
-        imie NVARCHAR(60),
-        nazwisko NVARCHAR(60),
+        imie VARCHAR(60),
+        nazwisko VARCHAR(60),
         data_urodzenia DATE
     );
 END;
+
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_kontaktowe' AND xtype='U')
 BEGIN
     CREATE TABLE dane_kontaktowe (
-        kontakt_id INT IDENTITY PRIMARY KEY,
+        kontakt_id INT PRIMARY KEY,
         osoba_id UNIQUEIDENTIFIER,
-        email NVARCHAR(100),
-        telefon NVARCHAR(60),
-        ulica NVARCHAR(100),
-        numer_domu NVARCHAR(60),
-        miasto NVARCHAR(60),
-        kod_pocztowy NVARCHAR(60),
-        kraj NVARCHAR(60),
+        email VARCHAR(100),
+        telefon VARCHAR(60),
+        ulica VARCHAR(100),
+        numer_domu VARCHAR(60),
+        miasto VARCHAR(60),
+        kod_pocztowy VARCHAR(60),
+        kraj VARCHAR(60),
         FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
     );
 END;
+
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_firmowe' AND xtype='U')
 BEGIN
     CREATE TABLE dane_firmowe (
-        firma_id INT IDENTITY PRIMARY KEY,
+        firma_id INT PRIMARY KEY,
         osoba_id UNIQUEIDENTIFIER,
-        nazwa_firmy NVARCHAR(150),
-        stanowisko NVARCHAR(255),
-        branza NVARCHAR(100),
+        nazwa_firmy VARCHAR(150),
+        stanowisko VARCHAR(255),
+        branza VARCHAR(100),
         FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
     );
 END;
 "
 
-# Kopiowanie plików CSV do kontenera
-echo "Kopiowanie plików CSV do kontenera MSSQL..."
+# Copy CSV files to container
+echo "Copying CSV files to MSSQL container..."
 docker cp "$CSV_SOURCE_DIR/dane_osobowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_osobowe.csv"
 docker cp "$CSV_SOURCE_DIR/dane_kontaktowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_kontaktowe.csv"
 docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_firmowe.csv"
 
-# Import danych z plików CSV
-echo "Importowanie danych z plików CSV..."
+# Import data from CSV files
+echo "Importing data from CSV files..."
 docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
 BULK INSERT dane_osobowe
 FROM '$SQL_SCRIPT_DIR/dane_osobowe.csv'
 WITH (
+    FORMAT = 'CSV',
+    FIRSTROW = 2,
     FIELDTERMINATOR = ',',
     ROWTERMINATOR = '\n',
-    FIRSTROW = 2
+    KEEPNULLS,
+    TABLOCK
 );
+
 BULK INSERT dane_kontaktowe
 FROM '$SQL_SCRIPT_DIR/dane_kontaktowe.csv'
 WITH (
+    FORMAT = 'CSV',
+    FIRSTROW = 2,
     FIELDTERMINATOR = ',',
     ROWTERMINATOR = '\n',
-    FIRSTROW = 2
+    KEEPNULLS,
+    TABLOCK
 );
+
 BULK INSERT dane_firmowe
 FROM '$SQL_SCRIPT_DIR/dane_firmowe.csv'
 WITH (
+    FORMAT = 'CSV',
+    FIRSTROW = 2,
     FIELDTERMINATOR = ',',
     ROWTERMINATOR = '\n',
-    FIRSTROW = 2
+    KEEPNULLS,
+    TABLOCK
 );
 "
 
-echo "Import zakończony pomyślnie!"
+echo "Import completed successfully!"
