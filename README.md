@@ -19,3 +19,7 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    ```bash
    git clone https://github.com/damianhalgas/vm_db_2025.git
    cd vm_db_2025
+4. Sprawdź Uprawnienia docker
+   ```bash
+   sudo groupadd docker
+   sudo usermod -aG docker $USER

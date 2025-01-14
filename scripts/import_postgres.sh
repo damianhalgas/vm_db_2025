@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Zmienne konfiguracyjne
-CONTAINER_NAME="post-conatiner"  # Nazwa kontenera PostgreSQL
+CONTAINER_NAME="post-container"  # Nazwa kontenera PostgreSQL
 DB_NAME="mydatabase"               # Nazwa bazy danych
 DB_USER="myuser"                   # Użytkownik PostgreSQL
 CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv"  # Lokalizacja plików CSV
