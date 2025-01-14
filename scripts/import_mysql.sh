@@ -29,24 +29,24 @@ CREATE DATABASE IF NOT EXISTS $DB_NAME;
 USE $DB_NAME;
 
 CREATE TABLE IF NOT EXISTS dane_osobowe (
-    osoba_id CHAR(36) PRIMARY KEY,
+    osoba_id CHAR(50) PRIMARY KEY,
     imie VARCHAR(50),
     nazwisko VARCHAR(50)
 );
 
 CREATE TABLE IF NOT EXISTS dane_kontaktowe (
-    osoba_id CHAR(36),
+    osoba_id CHAR(50),
     email VARCHAR(100),
     telefon VARCHAR(50),
     ulica VARCHAR(100),
-    numer_domu VARCHAR(20),
+    numer_domu VARCHAR(30),
     miasto VARCHAR(50),
     kod_pocztowy VARCHAR(50),
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 
 CREATE TABLE IF NOT EXISTS dane_firmowe (
-    osoba_id CHAR(36),
+    osoba_id CHAR(50),
     nazwa_firmy VARCHAR(100),
     stanowisko VARCHAR(100),
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
