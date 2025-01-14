@@ -2,7 +2,7 @@
 
 # Zmienne konfiguracyjne
 CONTAINER_NAME="mssql-container"
-DB_NAME="MyDatabase"
+DB_NAME="mydatabase"
 SA_PASSWORD="StrongPassword123!"
 CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"  # Lokalizacja plików CSV
 SQL_SCRIPT_DIR="/tmp/sql_scripts"  # Skrypty SQL w kontenerze
