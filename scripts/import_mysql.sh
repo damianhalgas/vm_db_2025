@@ -73,7 +73,7 @@ IGNORE 1 ROWS
 (osoba_id, email, telefon, ulica, numer_domu, miasto, kod_pocztowy);
 
 LOAD DATA INFILE '$CSV_TARGET_DIR/dane_firmowe.csv'
-IGNORE INTO TABLE dane_firmowe
+INTO TABLE dane_firmowe
 FIELDS TERMINATED BY ',' ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
