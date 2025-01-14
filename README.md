@@ -27,4 +27,14 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    Dla PostgreSQL
    ```bash
    ./scripts/import_postgres.sh
-6.
+6. Wejdź w baze SQL dla MySQL:
+   ```bash
+   sudo docker exec -it mysql-container mysql -u root -p
+   ```
+   Dla postgresql:
+   ```bash
+   ```
+   Dla MSSQL
+   ```bash
+   sqlcmd -S 127.0.0.1,1433 -U sa -P StrongPassword123! -C
+
