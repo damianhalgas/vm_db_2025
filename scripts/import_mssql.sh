@@ -28,7 +28,7 @@ docker exec -i $CONTAINER_NAME mkdir -p $SQL_SCRIPT_DIR
 
 # Tworzenie bazy danych i tabel
 echo "Tworzenie bazy danych i tabel..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -Q "
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -C -Q "
 CREATE DATABASE [$DB_NAME];
 USE [$DB_NAME];
 CREATE TABLE dane_osobowe (
