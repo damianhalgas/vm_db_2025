@@ -12,3 +12,10 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    ```bash
    git clone https://github.com/damianhalgas/vm_db_2025.git
    cd vm_db_2025
+2. Ustaw uprawnienia dla skryptów np.
+   ```bash
+   chmod +x scripts/import_postgres.sh
+3. Uruchom skrypty z folderu script:
+   ```bash
+   git clone https://github.com/damianhalgas/vm_db_2025.git
+   cd vm_db_2025

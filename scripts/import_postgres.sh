@@ -1,16 +1,25 @@
 #!/bin/bash
 
-# kopiowanie danych csv
-docker cp csv/dane_osobowe.csv postgres-container:/tmp/dane_osobowe.csv
-docker cp csv/dane_kontaktowe.csv postgres-container:/tmp/dane_kontaktowe.csv
-docker cp csv/dane_firmowe.csv postgres-container:/tmp/dane_firmowe.csv
-
 # Zmienne konfiguracyjne
-CONTAINER_NAME="post-conatiner"
-DB_NAME="mydatabase"
-DB_USER="myuser"
-DB_PASSWORD="mypassword"
-CSV_DIR="/tmp"  # Katalog w kontenerze, gdzie znajdują się pliki CSV
+CONTAINER_NAME="post-conatiner"  # Nazwa kontenera PostgreSQL
+DB_NAME="mydatabase"               # Nazwa bazy danych
+DB_USER="myuser"                   # Użytkownik PostgreSQL
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv"  # Lokalizacja plików CSV
+CSV_TARGET_DIR="/tmp"                # Lokalizacja plików CSV w kontenerze
+
+# Sprawdzenie, czy pliki CSV istnieją w źródłowej lokalizacji
+if [ ! -f "$CSV_SOURCE_DIR/dane_osobowe.csv" ] || \
+   [ ! -f "$CSV_SOURCE_DIR/dane_kontaktowe.csv" ] || \
+   [ ! -f "$CSV_SOURCE_DIR/dane_firmowe.csv" ]; then
+  echo "Błąd: Jeden lub więcej plików CSV nie istnieje w katalogu $CSV_SOURCE_DIR."
+  exit 1
+fi
+
+# Kopiowanie plików CSV do kontenera
+echo "Kopiowanie plików CSV do kontenera PostgreSQL..."
+docker cp "$CSV_SOURCE_DIR/dane_osobowe.csv" $CONTAINER_NAME:"$CSV_TARGET_DIR/dane_osobowe.csv"
+docker cp "$CSV_SOURCE_DIR/dane_kontaktowe.csv" $CONTAINER_NAME:"$CSV_TARGET_DIR/dane_kontaktowe.csv"
+docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$CSV_TARGET_DIR/dane_firmowe.csv"
 
 # Tworzenie tabel w PostgreSQL
 echo "Tworzenie tabel w bazie danych..."
@@ -38,23 +47,22 @@ CREATE TABLE IF NOT EXISTS dane_firmowe (
 );
 EOF
 
-# Import danych z plików CSV
+# Import danych z plików CSV do tabel
 echo "Importowanie danych z plików CSV..."
-
 docker exec -i $CONTAINER_NAME psql -U $DB_USER -d $DB_NAME <<EOF
-COPY dane_osobowe(osoba_id, imie, nazwisko) 
-FROM '$CSV_DIR/dane_osobowe.csv' 
-DELIMITER ',' 
+COPY dane_osobowe(osoba_id, imie, nazwisko)
+FROM '$CSV_TARGET_DIR/dane_osobowe.csv'
+DELIMITER ','
 CSV HEADER;
 
-COPY dane_kontaktowe(osoba_id, email, telefon, ulica, numer_domu, miasto, kod_pocztowy) 
-FROM '$CSV_DIR/dane_kontaktowe.csv' 
-DELIMITER ',' 
+COPY dane_kontaktowe(osoba_id, email, telefon, ulica, numer_domu, miasto, kod_pocztowy)
+FROM '$CSV_TARGET_DIR/dane_kontaktowe.csv'
+DELIMITER ','
 CSV HEADER;
 
-COPY dane_firmowe(osoba_id, nazwa_firmy, stanowisko) 
-FROM '$CSV_DIR/dane_firmowe.csv' 
-DELIMITER ',' 
+COPY dane_firmowe(osoba_id, nazwa_firmy, stanowisko)
+FROM '$CSV_TARGET_DIR/dane_firmowe.csv'
+DELIMITER ','
 CSV HEADER;
 EOF
 
