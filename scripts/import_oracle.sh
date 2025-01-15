@@ -110,7 +110,7 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv"    $CONTAINER_NAME:"$SQL_SCRIPT_DIR
 echo "Tworzenie tabel w bazie Oracle..."
 
 docker exec -i $CONTAINER_NAME bash -c "
-sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba <<EOF
+sqlplus myuser/$ORACLE_PWD<<EOF
 WHENEVER SQLERROR CONTINUE
 
 -- Usuwamy ewentualne poprzednie tabele (opcjonalnie)
@@ -162,7 +162,7 @@ for table in dane_osobowe dane_kontaktowe dane_firmowe; do
   # by 'AS SYSDBA' było traktowane jako jeden element.
   docker exec -i $CONTAINER_NAME bash -c "
     cd $SQL_SCRIPT_DIR
-    sqlldr 'sys/$ORACLE_PWD@${ORACLE_SID} AS SYSDBA' control=${table}.ctl log=${table}.log bad=${table}.bad
+    sqlldr myuser/$ORACLE_PWD control=${table}.ctl log=${table}.log bad=${table}.bad
   "
 
   # Pobierz log i bad na hosta
@@ -190,7 +190,7 @@ echo "  SPRAWDZENIE LICZBY REKORDÓW W TABELACH"
 echo "========================================"
 
 docker exec -i $CONTAINER_NAME bash -c "
-sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba <<EOF
+sqlplus myuser/$ORACLE_PWD <<EOF
 SET PAGESIZE 100
 SET LINESIZE 200
 
