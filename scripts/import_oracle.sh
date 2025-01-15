@@ -137,12 +137,12 @@ EOF
 # -- 6. Uruchom SQL*Loader i załaduj dane --
 # Klucz: "sys/haslo@... AS SYSDBA" musi być w cudzysłowach
 echo "Ładowanie danych do tabel..."
-docker exec -i $CONTAINER_NAME bash -c "
-  cd $SQL_SCRIPT_DIR
-  sqlldr \"sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID AS SYSDBA\" control=dane_osobowe.ctl
-  sqlldr \"sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID AS SYSDBA\" control=dane_kontaktowe.ctl
-  sqlldr \"sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID AS SYSDBA\" control=dane_firmowe.ctl
+docker exec -it $CONTAINER_NAME bash -c "
+sqlldr myuser/$ORACLE_PWD control=$SQL_SCRIPT_DIR/dane_osobowe.ctl
+sqlldr myuser/$ORACLE_PWD control=$SQL_SCRIPT_DIR/dane_kontaktowe.ctl
+sqlldr myuser/$ORACLE_PWD control=$SQL_SCRIPT_DIR/dane_firmowe.ctl
 "
+
 
 # -- 7. Sprawdź wyniki --
 echo "Sprawdzenie liczby zaimportowanych rekordów..."
