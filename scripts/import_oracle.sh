@@ -34,7 +34,7 @@ docker-compose up -d $CONTAINER_NAME
 
 # Poczekaj, aż Oracle się uruchomi
 echo "Czekanie na pełne uruchomienie Oracle..."
-sleep 120
+sleep 15
 
 # Sprawdź status kontenera
 if ! docker ps | grep -q $CONTAINER_NAME; then
