@@ -176,11 +176,6 @@ for table in dane_osobowe dane_kontaktowe dane_firmowe; do
 done
 
 # 9. WYŚWIETLENIE LOGÓW
-echo ""
-echo "========================================"
-echo "     LOGI SQL*LOADERA Z KONTENERA       "
-echo "========================================"
-
 for log_file in "$LOG_DIR"/*.log; do
   echo "--- Zawartość pliku log: $log_file ---"
   cat "$log_file"
@@ -188,11 +183,6 @@ for log_file in "$LOG_DIR"/*.log; do
 done
 
 # 10. SPRAWDZENIE LICZBY ZAIMPORTOWANYCH REKORDÓW
-echo ""
-echo "========================================"
-echo "  SPRAWDZENIE LICZBY REKORDÓW W TABELACH"
-echo "========================================"
-
 docker exec -i $CONTAINER_NAME bash -c "
 sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba <<EOF
 SET PAGESIZE 100
