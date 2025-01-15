@@ -37,4 +37,7 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    Dla MSSQL
    ```bash
    sudo docker exec -it mssql-container /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P StrongPassword123! -C
-
+   Dla Oracle
+7. W przypadku baz MSSQL musimy ręcznie dodać:
+   ```bash
+   CREATE DATABASE mydatabase;

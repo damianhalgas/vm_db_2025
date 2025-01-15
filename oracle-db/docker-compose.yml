@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  oracle:
+    image: oracleinanutshell/oracle-xe-11g
+    container_name: oracle-xe-container
+    ports:
+      - "1521:1521"
+      - "8080:8080"
+    environment:
+      ORACLE_ALLOW_REMOTE: "true"
+    volumes:
+      - oracle_data:/u01/app/oracle/oradata
+
+volumes:
+  oracle_data:
