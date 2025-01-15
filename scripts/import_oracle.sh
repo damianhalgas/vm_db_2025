@@ -1,45 +1,64 @@
 #!/bin/bash
-# Configuration variables
+
+# Konfiguracja
 CONTAINER_NAME="oracle-container"
-ORACLE_SID="XE"  # Oracle XE używa domyślnego SID "XE"
+ORACLE_SID="XE"
 ORACLE_PWD="StrongPassword123!"
 CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
 
-# Check if CSV files exist
+# Funkcja do usuwania BOM z plików CSV
+remove_bom() {
+  local file=$1
+  sed -i '1s/^\xEF\xBB\xBF//' "$file"
+}
+
+# Sprawdź, czy pliki CSV istnieją
 if [ ! -f "$CSV_SOURCE_DIR/dane_osobowe.csv" ] || \
    [ ! -f "$CSV_SOURCE_DIR/dane_kontaktowe.csv" ] || \
    [ ! -f "$CSV_SOURCE_DIR/dane_firmowe.csv" ]; then
-  echo "Error: One or more CSV files don't exist in $CSV_SOURCE_DIR."
+  echo "Błąd: Jeden lub więcej plików CSV nie istnieje w katalogu $CSV_SOURCE_DIR."
   exit 1
 fi
 
-# Start Oracle container
-echo "Starting Oracle container..."
+# Usuń BOM z plików CSV
+echo "Usuwanie BOM z plików CSV..."
+remove_bom "$CSV_SOURCE_DIR/dane_osobowe.csv"
+remove_bom "$CSV_SOURCE_DIR/dane_kontaktowe.csv"
+remove_bom "$CSV_SOURCE_DIR/dane_firmowe.csv"
+
+# Uruchom kontener Oracle
+echo "Uruchamianie kontenera Oracle..."
 docker-compose up -d $CONTAINER_NAME
 
-# Wait for Oracle to start
-echo "Waiting for Oracle to start..."
+# Poczekaj, aż Oracle się uruchomi
+echo "Czekanie na pełne uruchomienie Oracle..."
 sleep 120  # Oracle potrzebuje więcej czasu na inicjalizację
 
-# Create directory for SQL scripts in container
+# Sprawdź status kontenera
+if ! docker ps | grep -q $CONTAINER_NAME; then
+  echo "Kontener $CONTAINER_NAME nie działa. Sprawdź logi kontenera."
+  exit 1
+fi
+
+# Utwórz katalog na skrypty SQL w kontenerze
 docker exec -i $CONTAINER_NAME mkdir -p $SQL_SCRIPT_DIR
 
-# Copy CSV files to container
-echo "Copying CSV files to Oracle container..."
+# Kopiowanie plików CSV do kontenera
+echo "Kopiowanie plików CSV do kontenera Oracle..."
 docker cp "$CSV_SOURCE_DIR/dane_osobowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_osobowe.csv"
 docker cp "$CSV_SOURCE_DIR/dane_kontaktowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_kontaktowe.csv"
 docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_firmowe.csv"
 
-# Create user, tables, and import data
-echo "Creating user, tables, and importing data..."
+# Tworzenie użytkownika, tabel i importowanie danych
+echo "Tworzenie użytkownika, tabel i importowanie danych..."
 docker exec -i $CONTAINER_NAME bash -c "
-sqlplus sys/$ORACLE_PWD@//$ORACLE_SID as sysdba <<EOF
--- Create user and grant privileges
-CREATE USER myuser IDENTIFIED BY $ORACLE_PWD;
+sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba <<EOF
+-- Utwórz użytkownika i przypisz uprawnienia
+CREATE USER myuser IDENTIFIED BY '$ORACLE_PWD';
 GRANT CONNECT, RESOURCE TO myuser;
 
--- Create tables
+-- Utwórz tabele
 CREATE TABLE myuser.dane_osobowe (
     osoba_id VARCHAR2(36 CHAR) PRIMARY KEY,
     imie VARCHAR2(60 CHAR),
@@ -67,9 +86,8 @@ CREATE TABLE myuser.dane_firmowe (
     CONSTRAINT fk_dane_firmowe_osoba FOREIGN KEY (osoba_id) REFERENCES myuser.dane_osobowe(osoba_id)
 );
 
--- Load data using SQL*Loader or manual script if sqlldr is not available
 COMMIT;
 EOF
 "
 
-echo "Import completed successfully!"
+echo "Import zakończony pomyślnie!"

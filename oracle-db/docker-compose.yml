@@ -2,15 +2,16 @@ version: '3.8'
 
 services:
   oracle:
-    image: oracleinanutshell/oracle-xe-11g
+    image: gvenzl/oracle-xe:11-slim  # Lżejszy obraz Oracle XE
     container_name: oracle-container
     ports:
-      - "1521:1521"
-      - "8080:8080"
+      - "1521:1521"  # Port dla SQL*Net
+      - "5500:5500"  # Port dla Enterprise Manager
     environment:
-      ORACLE_ALLOW_REMOTE: "true"  # Zezwól na zdalne połączenia
+      ORACLE_PASSWORD: "StrongPassword123!"  # Ustawienie hasła użytkownika SYS/SYSTEM
+      ORACLE_CHARACTERSET: "AL32UTF8"       # Ustawienie zestawu znaków
     volumes:
-      - oracle_data:/u01/app/oracle/oradata  # Trwałe dane bazy
+      - oracle_data:/opt/oracle/oradata  # Miejsce na trwałe dane bazy danych
 
 volumes:
   oracle_data:
