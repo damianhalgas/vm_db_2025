@@ -74,7 +74,7 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/da
 
 # Tworzenie tabel i importowanie danych
 echo "Tworzenie tabel i importowanie danych..."
-docker exec -i $CONTAINER_NAME sqlplus sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba << EOF
+docker exec -i $CONTAINER_NAME sqlplus sys as sysdba << EOF
 CREATE TABLE dane_osobowe (
     osoba_id VARCHAR2(36 CHAR) PRIMARY KEY,
     imie VARCHAR2(60 CHAR),
@@ -109,13 +109,13 @@ EOF
 echo "Importowanie danych..."
 docker exec -i $CONTAINER_NAME bash -c "
 cd $SQL_SCRIPT_DIR
-sqlldr userid=sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba control=dane_osobowe.ctl
-sqlldr userid=sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba control=dane_kontaktowe.ctl
-sqlldr userid=sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba control=dane_firmowe.ctl
+sqlldr sys as sysdba control=dane_osobowe.ctl
+sqlldr sys as sysdba control=dane_kontaktowe.ctl
+sqlldr sys as sysdba control=dane_firmowe.ctl
 "
 
 # Sprawdź wyniki
-docker exec -i $CONTAINER_NAME sqlplus sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba << EOF
+docker exec -i $CONTAINER_NAME sqlplus sys as sysdba << EOF
 SELECT 'dane_osobowe' as tabela, COUNT(*) as liczba_rekordow FROM dane_osobowe;
 SELECT 'dane_kontaktowe' as tabela, COUNT(*) as liczba_rekordow FROM dane_kontaktowe;
 SELECT 'dane_firmowe' as tabela, COUNT(*) as liczba_rekordow FROM dane_firmowe;
