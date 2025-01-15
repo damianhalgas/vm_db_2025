@@ -48,7 +48,7 @@ TRAILING NULLCOLS
   osoba_id        CHAR(36),
   imie            CHAR(60),
   nazwisko        CHAR(60),
-  data_urodzenia  CHAR(10) "YYYY-MM-DD"
+  data_urodzenia  CHAR(8)  -- RRRRMMDD jako tekst
 )
 EOF
 
@@ -109,10 +109,9 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv"    $CONTAINER_NAME:"$SQL_SCRIPT_DIR
 echo "Tworzenie tabel w bazie Oracle..."
 
 docker exec -i $CONTAINER_NAME bash -c "
-sqlplus \'sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba\' <<EOF
+sqlplus 'sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba' <<EOF
 WHENEVER SQLERROR CONTINUE
 
--- Usuwamy ewentualne poprzednie tabele (opcjonalnie)
 DROP TABLE dane_firmowe CASCADE CONSTRAINTS;
 DROP TABLE dane_kontaktowe CASCADE CONSTRAINTS;
 DROP TABLE dane_osobowe CASCADE CONSTRAINTS;
@@ -121,7 +120,7 @@ CREATE TABLE dane_osobowe (
     osoba_id       VARCHAR2(36 CHAR) PRIMARY KEY,
     imie           VARCHAR2(60 CHAR),
     nazwisko       VARCHAR2(60 CHAR),
-    data_urodzenia DATE
+    data_urodzenia VARCHAR2(8 CHAR)  -- RRRRMMDD jako tekst
 );
 
 CREATE TABLE dane_kontaktowe (
@@ -154,7 +153,6 @@ EOF
 echo "Czekam 5 sekund na zapisanie tabel w systemie..."
 sleep 10
 
-
 # 8. ŁADOWANIE DANYCH PRZY UŻYCIU SQL*LOADER
 echo "Importowanie danych do tabel..."
 
@@ -162,11 +160,9 @@ for table in dane_osobowe dane_kontaktowe dane_firmowe; do
 
   echo ">>> Ładowanie dla tabeli: $table"
 
-  # Uwaga: w Oracle 11g/12c czasem trzeba parametry ująć w pojedyncze cudzysłowy,
-  # by 'AS SYSDBA' było traktowane jako jeden element.
   docker exec -i $CONTAINER_NAME bash -c "
     cd $SQL_SCRIPT_DIR
-    sqlldr \'sys/$ORACLE_PWD@${ORACLE_SID} AS SYSDBA\' control=$SQL_SCRIPT_DIR/${table}.ctl log=${table}.log bad=${table}.bad
+    sqlldr 'sys/$ORACLE_PWD@${ORACLE_SID} AS SYSDBA' control=$SQL_SCRIPT_DIR/${table}.ctl log=${table}.log bad=${table}.bad
   "
 
   # Pobierz log i bad na hosta
