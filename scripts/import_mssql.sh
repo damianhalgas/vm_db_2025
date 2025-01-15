@@ -8,10 +8,10 @@ SQL_SCRIPT_DIR="/tmp/sql_scripts"
 
 # Check if CSV files exist
 if [ ! -f "$CSV_SOURCE_DIR/dane_osobowe.csv" ] || \
-   [ ! -f "$CSV_SOURCE_DIR/dane_kontaktowe.csv" ] || \
-   [ ! -f "$CSV_SOURCE_DIR/dane_firmowe.csv" ]; then
-  echo "Error: One or more CSV files don't exist in $CSV_SOURCE_DIR."
-  exit 1
+  [ ! -f "$CSV_SOURCE_DIR/dane_kontaktowe.csv" ] || \
+  [ ! -f "$CSV_SOURCE_DIR/dane_firmowe.csv" ]; then
+ echo "Error: One or more CSV files don't exist in $CSV_SOURCE_DIR."
+ exit 1
 fi
 
 # Start MSSQL container
@@ -29,45 +29,45 @@ docker exec -i $CONTAINER_NAME mkdir -p $SQL_SCRIPT_DIR
 echo "Creating database and tables..."
 docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -C -Q "
 IF DB_ID('$DB_NAME') IS NULL
-    CREATE DATABASE [$DB_NAME];
+   CREATE DATABASE [$DB_NAME];
 USE [$DB_NAME];
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_osobowe' AND xtype='U')
 BEGIN
-    CREATE TABLE dane_osobowe (
-        osoba_id UNIQUEIDENTIFIER PRIMARY KEY,
-        imie VARCHAR(60),
-        nazwisko VARCHAR(60),
-        data_urodzenia DATE
-    );
+   CREATE TABLE dane_osobowe (
+       osoba_id UNIQUEIDENTIFIER PRIMARY KEY,
+       imie VARCHAR(60),
+       nazwisko VARCHAR(60),
+       data_urodzenia DATE
+   );
 END;
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_kontaktowe' AND xtype='U')
 BEGIN
-    CREATE TABLE dane_kontaktowe (
-        kontakt_id INT IDENTITY PRIMARY KEY,
-        osoba_id UNIQUEIDENTIFIER,
-        email VARCHAR(100),
-        telefon VARCHAR(60),
-        ulica VARCHAR(100),
-        numer_domu VARCHAR(60),
-        miasto VARCHAR(60),
-        kod_pocztowy VARCHAR(60),
-        kraj VARCHAR(60),
-        FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
-    );
+   CREATE TABLE dane_kontaktowe (
+       kontakt_id INT PRIMARY KEY,
+       osoba_id UNIQUEIDENTIFIER,
+       email VARCHAR(100),
+       telefon VARCHAR(60),
+       ulica VARCHAR(100),
+       numer_domu VARCHAR(60),
+       miasto VARCHAR(60),
+       kod_pocztowy VARCHAR(60),
+       kraj VARCHAR(60),
+       FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
+   );
 END;
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_firmowe' AND xtype='U')
 BEGIN
-    CREATE TABLE dane_firmowe (
-        firma_id INT IDENTITY PRIMARY KEY,
-        osoba_id UNIQUEIDENTIFIER,
-        nazwa_firmy VARCHAR(150),
-        stanowisko VARCHAR(255),
-        branza VARCHAR(100),
-        FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
-    );
+   CREATE TABLE dane_firmowe (
+       firma_id INT PRIMARY KEY,
+       osoba_id UNIQUEIDENTIFIER,
+       nazwa_firmy VARCHAR(150),
+       stanowisko VARCHAR(255),
+       branza VARCHAR(100),
+       FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
+   );
 END;
 "
 
@@ -88,28 +88,34 @@ ALTER TABLE dane_firmowe NOCHECK CONSTRAINT ALL;
 BULK INSERT dane_osobowe
 FROM '$SQL_SCRIPT_DIR/dane_osobowe.csv'
 WITH (
-    FIELDTERMINATOR = ',',
-    ROWTERMINATOR = '\n',
-    FIRSTROW = 2,
-    TABLOCK
+   FORMAT = 'CSV',
+   FIELDQUOTE = '\"',
+   FIELDTERMINATOR = ',',
+   ROWTERMINATOR = '\n',
+   FIRSTROW = 2,
+   TABLOCK
 );
 
 BULK INSERT dane_kontaktowe
 FROM '$SQL_SCRIPT_DIR/dane_kontaktowe.csv'
 WITH (
-    FIELDTERMINATOR = ',',
-    ROWTERMINATOR = '\n',
-    FIRSTROW = 2,
-    TABLOCK
+   FORMAT = 'CSV',
+   FIELDQUOTE = '\"',
+   FIELDTERMINATOR = ',',
+   ROWTERMINATOR = '\n',
+   FIRSTROW = 2,
+   TABLOCK
 );
 
 BULK INSERT dane_firmowe
 FROM '$SQL_SCRIPT_DIR/dane_firmowe.csv'
 WITH (
-    FIELDTERMINATOR = ',',
-    ROWTERMINATOR = '\n',
-    FIRSTROW = 2,
-    TABLOCK
+   FORMAT = 'CSV',
+   FIELDQUOTE = '\"',
+   FIELDTERMINATOR = ',',
+   ROWTERMINATOR = '\n',
+   FIRSTROW = 2,
+   TABLOCK
 );
 
 -- Re-enable foreign key constraints
