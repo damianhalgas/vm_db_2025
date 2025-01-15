@@ -10,7 +10,7 @@ ORACLE_SID="XE"
 ORACLE_PWD="oracle"                   # hasło do SYS
 CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
-LOG_DIR="/tmp/sql_loader_logs"
+LOG_DIR="/tmp/sql_scripts"
 
 # Funkcja do usuwania BOM z plików CSV (jeśli pliki mają BOM)
 remove_bom() {
