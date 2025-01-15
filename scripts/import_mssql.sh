@@ -6,6 +6,11 @@ SA_PASSWORD="StrongPassword123!"
 CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
 
+# Set environment variables for ODBC
+export SQLCMDSSL=1
+export SQLCMDTRUSTSERVERCERTIFICATE=1
+export ACCEPT_EULA=Y
+
 # Check if CSV files exist
 if [ ! -f "$CSV_SOURCE_DIR/dane_osobowe.csv" ] || \
   [ ! -f "$CSV_SOURCE_DIR/dane_kontaktowe.csv" ] || \
@@ -27,7 +32,11 @@ docker exec -i $CONTAINER_NAME mkdir -p $SQL_SCRIPT_DIR
 
 # Create database and tables
 echo "Creating database and tables..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -C -Q "
+docker exec -i -e "SQLCMDSSL=1" -e "SQLCMDTRUSTSERVERCERTIFICATE=1" $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd \
+    -S localhost \
+    -U sa \
+    -P $SA_PASSWORD \
+    -Q "
 IF DB_ID('$DB_NAME') IS NULL
    CREATE DATABASE [$DB_NAME];
 USE [$DB_NAME];
@@ -66,7 +75,7 @@ BEGIN
        FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
    );
 END;
-" -C
+"
 
 # Copy CSV files to container
 echo "Copying CSV files to MSSQL container..."
@@ -78,23 +87,39 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/da
 echo "Importing data from CSV files..."
 
 # Disable foreign key constraints
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
+docker exec -i -e "SQLCMDSSL=1" -e "SQLCMDTRUSTSERVERCERTIFICATE=1" $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd \
+    -S localhost \
+    -U sa \
+    -P $SA_PASSWORD \
+    -d $DB_NAME \
+    -Q "
 ALTER TABLE dane_kontaktowe NOCHECK CONSTRAINT ALL;
 ALTER TABLE dane_firmowe NOCHECK CONSTRAINT ALL;
 "
 
 # Import using bcp with trust server certificate
 echo "Importing dane_osobowe..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_osobowe" in "$SQL_SCRIPT_DIR/dane_osobowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C
+docker exec -i -e "SQLCMDSSL=1" -e "SQLCMDTRUSTSERVERCERTIFICATE=1" $CONTAINER_NAME /opt/mssql-tools18/bin/bcp \
+    "$DB_NAME.dbo.dane_osobowe" in "$SQL_SCRIPT_DIR/dane_osobowe.csv" \
+    -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C -T
 
 echo "Importing dane_kontaktowe..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_kontaktowe" in "$SQL_SCRIPT_DIR/dane_kontaktowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C
+docker exec -i -e "SQLCMDSSL=1" -e "SQLCMDTRUSTSERVERCERTIFICATE=1" $CONTAINER_NAME /opt/mssql-tools18/bin/bcp \
+    "$DB_NAME.dbo.dane_kontaktowe" in "$SQL_SCRIPT_DIR/dane_kontaktowe.csv" \
+    -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C -T
 
 echo "Importing dane_firmowe..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_firmowe" in "$SQL_SCRIPT_DIR/dane_firmowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C
+docker exec -i -e "SQLCMDSSL=1" -e "SQLCMDTRUSTSERVERCERTIFICATE=1" $CONTAINER_NAME /opt/mssql-tools18/bin/bcp \
+    "$DB_NAME.dbo.dane_firmowe" in "$SQL_SCRIPT_DIR/dane_firmowe.csv" \
+    -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C -T
 
-# Re-enable constraints
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
+# Re-enable constraints and show results
+docker exec -i -e "SQLCMDSSL=1" -e "SQLCMDTRUSTSERVERCERTIFICATE=1" $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd \
+    -S localhost \
+    -U sa \
+    -P $SA_PASSWORD \
+    -d $DB_NAME \
+    -Q "
 ALTER TABLE dane_kontaktowe WITH CHECK CHECK CONSTRAINT ALL;
 ALTER TABLE dane_firmowe WITH CHECK CHECK CONSTRAINT ALL;
 SELECT 'dane_osobowe' AS tabela, COUNT(*) AS liczba_rekordow FROM dane_osobowe
