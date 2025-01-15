@@ -8,7 +8,7 @@
 CONTAINER_NAME="oracle-container"     # nazwa uruchomionego kontenera
 ORACLE_SID="XE"
 ORACLE_PWD="oracle"                   # hasło do SYS
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/utf-8/20K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
 LOG_DIR="/tmp/sql_scripts"
 
@@ -110,7 +110,7 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv"    $CONTAINER_NAME:"$SQL_SCRIPT_DIR
 echo "Tworzenie tabel w bazie Oracle..."
 
 docker exec -i $CONTAINER_NAME bash -c "
-sqlplus myuser/$ORACLE_PWD<<EOF
+sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID<<EOF
 WHENEVER SQLERROR CONTINUE
 
 -- Usuwamy ewentualne poprzednie tabele (opcjonalnie)
@@ -162,7 +162,7 @@ for table in dane_osobowe dane_kontaktowe dane_firmowe; do
   # by 'AS SYSDBA' było traktowane jako jeden element.
   docker exec -i $CONTAINER_NAME bash -c "
     cd $SQL_SCRIPT_DIR
-    sqlldr myuser/$ORACLE_PWD control=${table}.ctl log=${table}.log bad=${table}.bad
+    sqlldr 'sys/$ORACLE_PWD@${ORACLE_SID} AS SYSDBA' control=${table}.ctl log=${table}.log bad=${table}.bad
   "
 
   # Pobierz log i bad na hosta
@@ -190,7 +190,7 @@ echo "  SPRAWDZENIE LICZBY REKORDÓW W TABELACH"
 echo "========================================"
 
 docker exec -i $CONTAINER_NAME bash -c "
-sqlplus myuser/$ORACLE_PWD <<EOF
+sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba <<EOF
 SET PAGESIZE 100
 SET LINESIZE 200
 
