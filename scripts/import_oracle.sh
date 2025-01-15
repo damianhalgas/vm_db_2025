@@ -166,7 +166,7 @@ for table in dane_osobowe dane_kontaktowe dane_firmowe; do
   # by 'AS SYSDBA' było traktowane jako jeden element.
   docker exec -i $CONTAINER_NAME bash -c "
     cd $SQL_SCRIPT_DIR
-    sqlldr 'sys/$ORACLE_PWD@${ORACLE_SID} AS SYSDBA' control=$SQL_SCRIPT_DIR/${table}.ctl log=${table}.log bad=${table}.bad
+    sqlldr \'sys/$ORACLE_PWD@${ORACLE_SID} AS SYSDBA\' control=$SQL_SCRIPT_DIR/${table}.ctl log=${table}.log bad=${table}.bad
   "
 
   # Pobierz log i bad na hosta
