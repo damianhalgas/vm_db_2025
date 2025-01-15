@@ -85,9 +85,10 @@ CREATE TABLE dane_firmowe (
 COMMIT;
 
 -- Importowanie danych
-HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID control=$SQL_SCRIPT_DIR/dane_osobowe.ctl log=$SQL_SCRIPT_DIR/dane_osobowe.log bad=$SQL_SCRIPT_DIR/dane_osobowe.bad
-HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID control=$SQL_SCRIPT_DIR/dane_kontaktowe.ctl log=$SQL_SCRIPT_DIR/dane_kontaktowe.log bad=$SQL_SCRIPT_DIR/dane_kontaktowe.bad
-HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID control=$SQL_SCRIPT_DIR/dane_firmowe.ctl log=$SQL_SCRIPT_DIR/dane_firmowe.log bad=$SQL_SCRIPT_DIR/dane_firmowe.bad
+HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba control=$SQL_SCRIPT_DIR/dane_osobowe.ctl log=$SQL_SCRIPT_DIR/dane_osobowe.log bad=$SQL_SCRIPT_DIR/dane_osobowe.bad
+HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba control=$SQL_SCRIPT_DIR/dane_kontaktowe.ctl log=$SQL_SCRIPT_DIR/dane_kontaktowe.log bad=$SQL_SCRIPT_DIR/dane_kontaktowe.bad
+HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba control=$SQL_SCRIPT_DIR/dane_firmowe.ctl log=$SQL_SCRIPT_DIR/dane_firmowe.log bad=$SQL_SCRIPT_DIR/dane_firmowe.bad
+
 EOF
 "
 
