@@ -110,7 +110,7 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv"    $CONTAINER_NAME:"$SQL_SCRIPT_DIR
 echo "Tworzenie tabel w bazie Oracle..."
 
 docker exec -i $CONTAINER_NAME bash -c "
-sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID<<EOF
+sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba <<EOF
 WHENEVER SQLERROR CONTINUE
 
 -- Usuwamy ewentualne poprzednie tabele (opcjonalnie)
@@ -150,6 +150,11 @@ CREATE TABLE dane_firmowe (
 EXIT;
 EOF
 "
+
+# Dodanie krótkiego opóźnienia
+echo "Czekam 5 sekund na zapisanie tabel w systemie..."
+sleep 10
+
 
 # 8. ŁADOWANIE DANYCH PRZY UŻYCIU SQL*LOADER
 echo "Importowanie danych do tabel..."
