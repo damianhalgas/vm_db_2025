@@ -7,7 +7,7 @@
 # ----- KONFIGURACJA -----
 CONTAINER_NAME="oracle-container"
 ORACLE_SID="XE"
-ORACLE_PWD="StrongPassword123!"
+ORACLE_PWD="oracle"
 CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
 

@@ -8,7 +8,7 @@ services:
       - "1521:1521"  # Port dla SQL*Net
       - "5500:5500"  # Port dla Enterprise Manager
     environment:
-      ORACLE_PASSWORD: "StrongPassword123!"  # Ustawienie hasła użytkownika SYS/SYSTEM
+      ORACLE_PASSWORD: "oracle"  # Ustawienie hasła użytkownika SYS/SYSTEM
       ORACLE_CHARACTERSET: "AL32UTF8"       # Ustawienie zestawu znaków
     volumes:
       - oracle_data:/opt/oracle/oradata  # Miejsce na trwałe dane bazy danych
