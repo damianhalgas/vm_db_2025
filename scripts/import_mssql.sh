@@ -79,55 +79,31 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/da
 
 # Import data from CSV files
 echo "Importing data from CSV files..."
+
+# Disable foreign key constraints
 docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
--- Disable foreign key constraints temporarily
 ALTER TABLE dane_kontaktowe NOCHECK CONSTRAINT ALL;
 ALTER TABLE dane_firmowe NOCHECK CONSTRAINT ALL;
+"
 
--- Import data
-BULK INSERT dane_osobowe
-FROM '$SQL_SCRIPT_DIR/dane_osobowe.csv'
-WITH (
-   FORMAT = 'CSV',
-   FIELDQUOTE = '\"',
-   FIELDTERMINATOR = ',',
-   ROWTERMINATOR = '\n',
-   FIRSTROW = 2,
-   TABLOCK
-);
+# Import using bcp
+echo "Importing dane_osobowe..."
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_osobowe" in "$SQL_SCRIPT_DIR/dane_osobowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2
 
-BULK INSERT dane_kontaktowe
-FROM '$SQL_SCRIPT_DIR/dane_kontaktowe.csv'
-WITH (
-   FORMAT = 'CSV',
-   FIELDQUOTE = '\"',
-   FIELDTERMINATOR = ',',
-   ROWTERMINATOR = '\n',
-   FIRSTROW = 2,
-   TABLOCK
-);
+echo "Importing dane_kontaktowe..."
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_kontaktowe" in "$SQL_SCRIPT_DIR/dane_kontaktowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2
 
-BULK INSERT dane_firmowe
-FROM '$SQL_SCRIPT_DIR/dane_firmowe.csv'
-WITH (
-   FORMAT = 'CSV',
-   FIELDQUOTE = '\"',
-   FIELDTERMINATOR = ',',
-   ROWTERMINATOR = '\n',
-   FIRSTROW = 2,
-   TABLOCK
-);
+echo "Importing dane_firmowe..."
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_firmowe" in "$SQL_SCRIPT_DIR/dane_firmowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2
 
--- Re-enable foreign key constraints
+# Re-enable constraints
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
 ALTER TABLE dane_kontaktowe WITH CHECK CHECK CONSTRAINT ALL;
 ALTER TABLE dane_firmowe WITH CHECK CHECK CONSTRAINT ALL;
 
--- Verify record counts
 SELECT 'dane_osobowe' AS tabela, COUNT(*) AS liczba_rekordow FROM dane_osobowe
 UNION ALL
 SELECT 'dane_kontaktowe', COUNT(*) FROM dane_kontaktowe
 UNION ALL
 SELECT 'dane_firmowe', COUNT(*) FROM dane_firmowe;
 "
-
-echo "Import completed successfully!"
