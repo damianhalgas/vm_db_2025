@@ -8,9 +8,9 @@ services:
       - "1521:1521"
       - "8080:8080"
     environment:
-      ORACLE_ALLOW_REMOTE: "true"
+      ORACLE_ALLOW_REMOTE: "true"  # Zezwól na zdalne połączenia
     volumes:
-      - oracle_data:/u01/app/oracle/oradata
+      - oracle_data:/u01/app/oracle/oradata  # Trwałe dane bazy
 
 volumes:
   oracle_data:

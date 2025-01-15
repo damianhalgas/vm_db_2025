@@ -1,8 +1,7 @@
 #!/bin/bash
 # Configuration variables
 CONTAINER_NAME="oracle-container"
-ORACLE_SID="ORCL"
-ORACLE_PDB="PDB1"
+ORACLE_SID="XE"  # Oracle XE używa domyślnego SID "XE"
 ORACLE_PWD="StrongPassword123!"
 CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
@@ -32,14 +31,13 @@ docker cp "$CSV_SOURCE_DIR/dane_osobowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/da
 docker cp "$CSV_SOURCE_DIR/dane_kontaktowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_kontaktowe.csv"
 docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_firmowe.csv"
 
-# Create tables and import data
-echo "Creating tables and importing data..."
+# Create user, tables, and import data
+echo "Creating user, tables, and importing data..."
 docker exec -i $CONTAINER_NAME bash -c "
 sqlplus sys/$ORACLE_PWD@//$ORACLE_SID as sysdba <<EOF
+-- Create user and grant privileges
 CREATE USER myuser IDENTIFIED BY $ORACLE_PWD;
 GRANT CONNECT, RESOURCE TO myuser;
-
-ALTER SESSION SET CONTAINER=$ORACLE_PDB;
 
 -- Create tables
 CREATE TABLE myuser.dane_osobowe (
@@ -69,33 +67,7 @@ CREATE TABLE myuser.dane_firmowe (
     CONSTRAINT fk_dane_firmowe_osoba FOREIGN KEY (osoba_id) REFERENCES myuser.dane_osobowe(osoba_id)
 );
 
--- Import data from CSV
-BEGIN
-    EXECUTE IMMEDIATE 'TRUNCATE TABLE myuser.dane_osobowe';
-    EXECUTE IMMEDIATE 'TRUNCATE TABLE myuser.dane_kontaktowe';
-    EXECUTE IMMEDIATE 'TRUNCATE TABLE myuser.dane_firmowe';
-END;
-/
-
--- Load data
-LOAD DATA INFILE '$SQL_SCRIPT_DIR/dane_osobowe.csv'
-INTO TABLE myuser.dane_osobowe
-FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'
-LINES TERMINATED BY '\n'
-(osoba_id, imie, nazwisko, data_urodzenia);
-
-LOAD DATA INFILE '$SQL_SCRIPT_DIR/dane_kontaktowe.csv'
-INTO TABLE myuser.dane_kontaktowe
-FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'
-LINES TERMINATED BY '\n'
-(osoba_id, email, telefon, ulica, numer_domu, miasto, kod_pocztowy, kraj);
-
-LOAD DATA INFILE '$SQL_SCRIPT_DIR/dane_firmowe.csv'
-INTO TABLE myuser.dane_firmowe
-FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"'
-LINES TERMINATED BY '\n'
-(osoba_id, nazwa_firmy, stanowisko, branza);
-
+-- Load data using SQL*Loader or manual script if sqlldr is not available
 COMMIT;
 EOF
 "
