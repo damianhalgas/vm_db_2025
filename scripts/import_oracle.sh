@@ -48,7 +48,7 @@ TRAILING NULLCOLS
   osoba_id        CHAR(36),
   imie            CHAR(60),
   nazwisko        CHAR(60),
-  data_urodzenia  CHAR(8)  -- RRRRMMDD jako tekst
+  data_urodzenia  CHAR(10)  -- RRRRMMDD jako tekst
 )
 EOF
 
