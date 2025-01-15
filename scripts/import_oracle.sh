@@ -50,23 +50,19 @@ docker cp "$CSV_SOURCE_DIR/dane_osobowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/da
 docker cp "$CSV_SOURCE_DIR/dane_kontaktowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_kontaktowe.csv"
 docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_firmowe.csv"
 
-# Tworzenie użytkownika, tabel i importowanie danych
-echo "Tworzenie użytkownika, tabel i importowanie danych..."
+# Tworzenie tabel i importowanie danych
+echo "Tworzenie tabel i importowanie danych..."
 docker exec -i $CONTAINER_NAME bash -c "
 sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba <<EOF
--- Utwórz użytkownika i przypisz uprawnienia
-CREATE USER myuser IDENTIFIED BY '$ORACLE_PWD';
-GRANT CONNECT, RESOURCE TO myuser;
-
--- Utwórz tabele
-CREATE TABLE myuser.dane_osobowe (
+-- Utwórz tabele w schemacie SYS
+CREATE TABLE dane_osobowe (
     osoba_id VARCHAR2(36 CHAR) PRIMARY KEY,
     imie VARCHAR2(60 CHAR),
     nazwisko VARCHAR2(60 CHAR),
     data_urodzenia DATE
 );
 
-CREATE TABLE myuser.dane_kontaktowe (
+CREATE TABLE dane_kontaktowe (
     osoba_id VARCHAR2(36 CHAR),
     email VARCHAR2(100 CHAR),
     telefon VARCHAR2(60 CHAR),
@@ -75,16 +71,20 @@ CREATE TABLE myuser.dane_kontaktowe (
     miasto VARCHAR2(60 CHAR),
     kod_pocztowy VARCHAR2(60 CHAR),
     kraj VARCHAR2(60 CHAR),
-    CONSTRAINT fk_dane_kontaktowe_osoba FOREIGN KEY (osoba_id) REFERENCES myuser.dane_osobowe(osoba_id)
+    CONSTRAINT fk_dane_kontaktowe_osoba FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 
-CREATE TABLE myuser.dane_firmowe (
+CREATE TABLE dane_firmowe (
     osoba_id VARCHAR2(36 CHAR),
     nazwa_firmy VARCHAR2(150 CHAR),
     stanowisko VARCHAR2(255 CHAR),
     branza VARCHAR2(100 CHAR),
-    CONSTRAINT fk_dane_firmowe_osoba FOREIGN KEY (osoba_id) REFERENCES myuser.dane_osobowe(osoba_id)
+    CONSTRAINT fk_dane_firmowe_osoba FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
+
+-- Wczytaj dane z CSV (SQL*Loader lub INSERT)
+-- Jeżeli masz SQL*Loader, użyj go zamiast INSERT
+-- INSERT INTO dane_osobowe (...) VALUES (...);
 
 COMMIT;
 EOF
