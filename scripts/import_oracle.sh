@@ -48,7 +48,6 @@ TRAILING NULLCOLS
   osoba_id        CHAR(36),
   imie            CHAR(60),
   nazwisko        CHAR(60),
-  -- jeżeli CSV ma daty w formacie YYYY-MM-DD
   data_urodzenia  CHAR(10) "YYYY-MM-DD"
 )
 EOF
