@@ -49,3 +49,5 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
 7. W przypadku baz MSSQL musimy ręcznie dodać:
    ```bash
    CREATE DATABASE mydatabase;
+
+

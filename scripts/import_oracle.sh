@@ -120,7 +120,7 @@ CREATE TABLE dane_osobowe (
     osoba_id       VARCHAR2(36 CHAR) PRIMARY KEY,
     imie           VARCHAR2(60 CHAR),
     nazwisko       VARCHAR2(60 CHAR),
-    data_urodzenia VARCHAR2(8 CHAR)  -- RRRRMMDD jako tekst
+    data_urodzenia VARCHAR2(10 CHAR)  -- RRRRMMDD jako tekst
 );
 
 CREATE TABLE dane_kontaktowe (
