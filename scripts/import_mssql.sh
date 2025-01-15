@@ -31,7 +31,6 @@ docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa 
 IF DB_ID('$DB_NAME') IS NULL
    CREATE DATABASE [$DB_NAME];
 USE [$DB_NAME];
-
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_osobowe' AND xtype='U')
 BEGIN
    CREATE TABLE dane_osobowe (
@@ -41,7 +40,6 @@ BEGIN
        data_urodzenia DATE
    );
 END;
-
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_kontaktowe' AND xtype='U')
 BEGIN
    CREATE TABLE dane_kontaktowe (
@@ -57,7 +55,6 @@ BEGIN
        FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
    );
 END;
-
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='dane_firmowe' AND xtype='U')
 BEGIN
    CREATE TABLE dane_firmowe (
@@ -69,7 +66,7 @@ BEGIN
        FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
    );
 END;
-"
+" -C
 
 # Copy CSV files to container
 echo "Copying CSV files to MSSQL container..."
@@ -81,29 +78,28 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/da
 echo "Importing data from CSV files..."
 
 # Disable foreign key constraints
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -Q "
 ALTER TABLE dane_kontaktowe NOCHECK CONSTRAINT ALL;
 ALTER TABLE dane_firmowe NOCHECK CONSTRAINT ALL;
-"
+" -C
 
-# Import using bcp
+# Import using bcp with trust server certificate
 echo "Importing dane_osobowe..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_osobowe" in "$SQL_SCRIPT_DIR/dane_osobowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_osobowe" in "$SQL_SCRIPT_DIR/dane_osobowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C
 
 echo "Importing dane_kontaktowe..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_kontaktowe" in "$SQL_SCRIPT_DIR/dane_kontaktowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_kontaktowe" in "$SQL_SCRIPT_DIR/dane_kontaktowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C
 
 echo "Importing dane_firmowe..."
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_firmowe" in "$SQL_SCRIPT_DIR/dane_firmowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/bcp "$DB_NAME.dbo.dane_firmowe" in "$SQL_SCRIPT_DIR/dane_firmowe.csv" -S localhost -U sa -P $SA_PASSWORD -c -t, -r'\n' -F 2 -C
 
 # Re-enable constraints
-docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -C -Q "
+docker exec -i $CONTAINER_NAME /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d $DB_NAME -Q "
 ALTER TABLE dane_kontaktowe WITH CHECK CHECK CONSTRAINT ALL;
 ALTER TABLE dane_firmowe WITH CHECK CHECK CONSTRAINT ALL;
-
 SELECT 'dane_osobowe' AS tabela, COUNT(*) AS liczba_rekordow FROM dane_osobowe
 UNION ALL
 SELECT 'dane_kontaktowe', COUNT(*) FROM dane_kontaktowe
 UNION ALL
 SELECT 'dane_firmowe', COUNT(*) FROM dane_firmowe;
-"
+" -C
