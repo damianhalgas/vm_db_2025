@@ -1,18 +1,10 @@
 #!/bin/bash
-
 # Konfiguracja
 CONTAINER_NAME="oracle-container"
 ORACLE_SID="XE"
 ORACLE_PWD="StrongPassword123!"
 CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
-LOCAL_LOG_DIR="/home/administrator/oracle_logs"  # Lokalny katalog na logi
-
-# Funkcja do usuwania BOM z plików CSV
-remove_bom() {
-  local file=$1
-  sed -i '1s/^\xEF\xBB\xBF//' "$file"
-}
 
 # Sprawdź, czy pliki CSV istnieją
 if [ ! -f "$CSV_SOURCE_DIR/dane_osobowe.csv" ] || \
@@ -22,28 +14,57 @@ if [ ! -f "$CSV_SOURCE_DIR/dane_osobowe.csv" ] || \
   exit 1
 fi
 
-# Usuń BOM z plików CSV
-echo "Usuwanie BOM z plików CSV..."
-remove_bom "$CSV_SOURCE_DIR/dane_osobowe.csv"
-remove_bom "$CSV_SOURCE_DIR/dane_kontaktowe.csv"
-remove_bom "$CSV_SOURCE_DIR/dane_firmowe.csv"
+# Utwórz pliki kontrolne
+cat > dane_osobowe.ctl << EOF
+LOAD DATA
+INFILE '$SQL_SCRIPT_DIR/dane_osobowe.csv'
+INTO TABLE dane_osobowe
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(
+  osoba_id,
+  imie,
+  nazwisko,
+  data_urodzenia DATE "YYYY-MM-DD"
+)
+EOF
 
-# Uruchom kontener Oracle
-echo "Uruchamianie kontenera Oracle..."
-docker-compose up -d $CONTAINER_NAME
+cat > dane_kontaktowe.ctl << EOF
+LOAD DATA
+INFILE '$SQL_SCRIPT_DIR/dane_kontaktowe.csv'
+INTO TABLE dane_kontaktowe
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(
+  osoba_id,
+  email,
+  telefon,
+  ulica,
+  numer_domu,
+  miasto,
+  kod_pocztowy,
+  kraj
+)
+EOF
 
-# Poczekaj, aż Oracle się uruchomi
-echo "Czekanie na pełne uruchomienie Oracle..."
-sleep 120
+cat > dane_firmowe.ctl << EOF
+LOAD DATA
+INFILE '$SQL_SCRIPT_DIR/dane_firmowe.csv'
+INTO TABLE dane_firmowe
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(
+  osoba_id,
+  nazwa_firmy,
+  stanowisko,
+  branza
+)
+EOF
 
-# Sprawdź status kontenera
-if ! docker ps | grep -q $CONTAINER_NAME; then
-  echo "Kontener $CONTAINER_NAME nie działa. Sprawdź logi kontenera."
-  exit 1
-fi
-
-# Utwórz katalogi na logi i skrypty SQL w kontenerze
-docker exec -i $CONTAINER_NAME bash -c "mkdir -p $SQL_SCRIPT_DIR"
+# Kopiuj pliki kontrolne do kontenera
+docker cp dane_osobowe.ctl $CONTAINER_NAME:$SQL_SCRIPT_DIR/
+docker cp dane_kontaktowe.ctl $CONTAINER_NAME:$SQL_SCRIPT_DIR/
+docker cp dane_firmowe.ctl $CONTAINER_NAME:$SQL_SCRIPT_DIR/
 
 # Kopiowanie plików CSV do kontenera
 echo "Kopiowanie plików CSV do kontenera Oracle..."
@@ -53,9 +74,7 @@ docker cp "$CSV_SOURCE_DIR/dane_firmowe.csv" $CONTAINER_NAME:"$SQL_SCRIPT_DIR/da
 
 # Tworzenie tabel i importowanie danych
 echo "Tworzenie tabel i importowanie danych..."
-docker exec -i $CONTAINER_NAME bash -c "
-sqlplus sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba <<EOF
--- Tworzenie tabel
+docker exec -i $CONTAINER_NAME sqlplus sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba << EOF
 CREATE TABLE dane_osobowe (
     osoba_id VARCHAR2(36 CHAR) PRIMARY KEY,
     imie VARCHAR2(60 CHAR),
@@ -82,21 +101,25 @@ CREATE TABLE dane_firmowe (
     branza VARCHAR2(100 CHAR),
     CONSTRAINT fk_dane_firmowe_osoba FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
-COMMIT;
 
--- Importowanie danych
-HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba control=$SQL_SCRIPT_DIR/dane_osobowe.ctl log=$SQL_SCRIPT_DIR/dane_osobowe.log bad=$SQL_SCRIPT_DIR/dane_osobowe.bad
-HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba control=$SQL_SCRIPT_DIR/dane_kontaktowe.ctl log=$SQL_SCRIPT_DIR/dane_kontaktowe.log bad=$SQL_SCRIPT_DIR/dane_kontaktowe.bad
-HOST sqlldr userid=sys/$ORACLE_PWD@localhost:1521/$ORACLE_SID as sysdba control=$SQL_SCRIPT_DIR/dane_firmowe.ctl log=$SQL_SCRIPT_DIR/dane_firmowe.log bad=$SQL_SCRIPT_DIR/dane_firmowe.bad
-
+exit;
 EOF
+
+# Import danych używając SQL*Loader
+echo "Importowanie danych..."
+docker exec -i $CONTAINER_NAME bash -c "
+cd $SQL_SCRIPT_DIR
+sqlldr userid=sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba control=dane_osobowe.ctl
+sqlldr userid=sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba control=dane_kontaktowe.ctl
+sqlldr userid=sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba control=dane_firmowe.ctl
 "
 
-# Skopiuj logi z kontenera na lokalny system
-echo "Kopiowanie logów z kontenera na lokalny system..."
-mkdir -p $LOCAL_LOG_DIR
-docker cp $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_osobowe.log" "$LOCAL_LOG_DIR/"
-docker cp $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_kontaktowe.log" "$LOCAL_LOG_DIR/"
-docker cp $CONTAINER_NAME:"$SQL_SCRIPT_DIR/dane_firmowe.log" "$LOCAL_LOG_DIR/"
+# Sprawdź wyniki
+docker exec -i $CONTAINER_NAME sqlplus sys/$ORACLE_PWD@//localhost:1521/$ORACLE_SID as sysdba << EOF
+SELECT 'dane_osobowe' as tabela, COUNT(*) as liczba_rekordow FROM dane_osobowe;
+SELECT 'dane_kontaktowe' as tabela, COUNT(*) as liczba_rekordow FROM dane_kontaktowe;
+SELECT 'dane_firmowe' as tabela, COUNT(*) as liczba_rekordow FROM dane_firmowe;
+exit;
+EOF
 
-echo "Import zakończony pomyślnie! Logi znajdują się w katalogu: $LOCAL_LOG_DIR"
+echo "Import zakończony"
