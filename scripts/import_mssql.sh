@@ -3,7 +3,7 @@
 CONTAINER_NAME="mssql-container"
 DB_NAME="mydatabase"
 SA_PASSWORD="StrongPassword123!"
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/utf-8/20K"
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/utf-8/50K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
 
 # Check if CSV files exist
@@ -38,7 +38,7 @@ BEGIN
         osoba_id UNIQUEIDENTIFIER PRIMARY KEY,
         imie VARCHAR(60),
         nazwisko VARCHAR(60),
-        data_urodzenia VARCHAR(10)
+        data_urodzenia VARCHAR(60)
     );
 END;
 
