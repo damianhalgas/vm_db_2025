@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS dane_osobowe (
     osoba_id CHAR(36) PRIMARY KEY,  -- UUID jako klucz główny
     imie VARCHAR(60),
     nazwisko VARCHAR(60),
-    data_urodzenia DATE  -- Dodano pole data_urodzenia
+    data_urodzenia VARCHAR(10)  -- Dodano pole data_urodzenia
 );
 
 CREATE TABLE IF NOT EXISTS dane_kontaktowe (
