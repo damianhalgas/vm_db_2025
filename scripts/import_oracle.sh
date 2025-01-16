@@ -8,7 +8,7 @@
 CONTAINER_NAME="oracle-container"     # nazwa uruchomionego kontenera
 ORACLE_SID="XE"
 ORACLE_PWD="oracle"                   # hasło do SYS
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/utf-8/50K"
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/utf-8/100K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts/"
 LOG_DIR="/tmp/sql_scripts"
 
