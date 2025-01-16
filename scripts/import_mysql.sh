@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS dane_osobowe (
 );
 
 CREATE TABLE IF NOT EXISTS dane_kontaktowe (
+    kontakt_id INT AUTO_INCREMENT PRIMARY KEY,
     osoba_id CHAR(36),  -- UUID jako klucz obcy
     email VARCHAR(100),
     telefon VARCHAR(60),
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS dane_kontaktowe (
 );
 
 CREATE TABLE IF NOT EXISTS dane_firmowe (
+    firma_id INT AUTO_INCREMENT PRIMARY KEY,
     osoba_id CHAR(36),  -- UUID jako klucz obcy
     nazwa_firmy VARCHAR(150),
     stanowisko VARCHAR(255),
