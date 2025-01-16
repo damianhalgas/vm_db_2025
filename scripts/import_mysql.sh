@@ -5,7 +5,7 @@ CONTAINER_NAME="mysql-container"  # Nazwa kontenera MySQL
 DB_NAME="mydatabase"              # Nazwa bazy danych
 DB_ROOT_USER="root"               # Użytkownik root
 DB_ROOT_PASSWORD="rootpassword"   # Hasło użytkownika root
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/utf-8/20K"  # Lokalizacja plików CSV 
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/utf-8/50K"  # Lokalizacja plików CSV 
 CSV_TARGET_DIR="/tmp"             # Lokalizacja plików CSV w kontenerze
 
 # Sprawdzenie, czy pliki CSV istnieją w źródłowej lokalizacji
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS dane_osobowe (
 );
 
 CREATE TABLE IF NOT EXISTS dane_kontaktowe (
-    kontakt_id INT AUTO_INCREMENT PRIMARY KEY,
+    osoba_id CHAR(36),  -- UUID jako klucz obcy
     email VARCHAR(100),
     telefon VARCHAR(60),
     ulica VARCHAR(100),
