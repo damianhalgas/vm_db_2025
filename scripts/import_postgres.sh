@@ -38,14 +38,14 @@ CREATE TABLE IF NOT EXISTS dane_kontaktowe (
     numer_domu VARCHAR(10),
     miasto VARCHAR(50),
     kod_pocztowy VARCHAR(20),
-    kraj VARCHAR(50),
+    kraj VARCHAR(100),
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 CREATE TABLE IF NOT EXISTS dane_firmowe (
     osoba_id UUID,
     nazwa_firmy VARCHAR(100),
     stanowisko VARCHAR(100),
-    branza VARCHAR(100)
+    branza VARCHAR(100),
     FOREIGN KEY (osoba_id) REFERENCES dane_osobowe(osoba_id)
 );
 EOF
