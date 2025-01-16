@@ -38,7 +38,7 @@ BEGIN
         osoba_id UNIQUEIDENTIFIER PRIMARY KEY,
         imie VARCHAR(60),
         nazwisko VARCHAR(60),
-        data_urodzenia DATE
+        data_urodzenia VARCHAR(10)
     );
 END;
 
