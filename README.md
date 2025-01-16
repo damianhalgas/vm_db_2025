@@ -33,6 +33,7 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    ```
    Dla postgresql:
    ```bash
+   docker exec -it post-container psql -U myuser -d mydatabase
    ```
    Dla MSSQL
    ```bash
