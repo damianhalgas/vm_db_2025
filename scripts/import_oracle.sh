@@ -1,14 +1,10 @@
 #!/bin/bash
-# -----------------------------------------------------------------
-# Skrypt ładowania danych z plików CSV do bazy Oracle w kontenerze
-# przy użyciu SQL*Loader. Sprawdzony w Oracle 11g/12c/21c i Docker.
-# -----------------------------------------------------------------
 
 # 1. KONFIGURACJA
 CONTAINER_NAME="oracle-container"     # nazwa uruchomionego kontenera
 ORACLE_SID="XE"
 ORACLE_PWD="oracle"                   # hasło do SYS
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/utf-8/20K"
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/20K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts/"
 LOG_DIR="/tmp/sql_scripts"
 
