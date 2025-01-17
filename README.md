@@ -15,7 +15,7 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
 2. Uruchom kontener np. 
    Przejdź do folderu wybranej bazy:
    ```bash
-   sudo docker-compose up -d
+   sudo docker compose up -d
 3. Ustaw uprawnienia dla skryptów np.
    ```bash
    chmod +x scripts/import_postgres.sh
