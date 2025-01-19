@@ -2,13 +2,13 @@ version: '3.8'
 
 services:
   oracle:
-    image: gvenzl/oracle-xe:11-slim  # Lżejszy obraz Oracle XE
+    image: gvenzl/oracle-xe:11-slim  # Oracle XE
     container_name: oracle-container
     ports:
       - "1521:1521"  # Port dla SQL*Net
       - "5500:5500"  # Port dla Enterprise Manager
     environment:
-      ORACLE_PASSWORD: "oracle"  # Ustawienie hasła użytkownika SYS/SYSTEM
+      ORACLE_PASSWORD: "oracle"  # Ustawienie hasła użytkownika SYS as sysdba
       ORACLE_CHARACTERSET: "AL32UTF8"       # Ustawienie zestawu znaków
     volumes:
       - oracle_data:/opt/oracle/oradata  # Miejsce na trwałe dane bazy danych
