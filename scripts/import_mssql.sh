@@ -3,7 +3,7 @@
 CONTAINER_NAME="mssql-container"
 DB_NAME="mydatabase"
 SA_PASSWORD="StrongPassword123!"
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/50K"
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/100K"
 SQL_SCRIPT_DIR="/tmp/sql_scripts"
 
 # Check if CSV files exist
