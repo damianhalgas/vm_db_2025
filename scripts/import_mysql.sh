@@ -5,7 +5,7 @@ CONTAINER_NAME="mysql-container"  # Nazwa kontenera MySQL
 DB_NAME="mydatabase"              # Nazwa bazy danych
 DB_ROOT_USER="root"               # Użytkownik root
 DB_ROOT_PASSWORD="rootpassword"   # Hasło użytkownika root
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/50K"  # Lokalizacja plików CSV 
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/100K"  # Lokalizacja plików CSV 
 CSV_TARGET_DIR="/tmp"             # Lokalizacja plików CSV w kontenerze
 
 # Sprawdzenie, czy pliki CSV istnieją w źródłowej lokalizacji
