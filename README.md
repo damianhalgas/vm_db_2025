@@ -5,7 +5,7 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
 
 ## Wymagania
 - Docker i Docker Compose zainstalowane na komputerze.
-- Kod jest przygotowany do działania na Ubuntu Server 22.04.1 LTS x86_64
+- Kod jest przygotowany do działania na Ubuntu Server 24.04.1 LTS x86_64
 
 ## Sposób użycia
 1. Sklonuj repozytorium:
