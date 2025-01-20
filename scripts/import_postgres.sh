@@ -4,7 +4,7 @@
 CONTAINER_NAME="post-container"  # Nazwa kontenera PostgreSQL
 DB_NAME="mydatabase"               # Nazwa bazy danych
 DB_USER="myuser"                   # Użytkownik PostgreSQL
-CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/100K"  # Lokalizacja plików CSV 
+CSV_SOURCE_DIR="/home/administrator/vm_db_2025/csv/50K"  # Lokalizacja plików CSV 
 CSV_TARGET_DIR="/tmp"                # Lokalizacja plików CSV w kontenerze
 
 # Sprawdzenie, czy pliki CSV istnieją w źródłowej lokalizacji
