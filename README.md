@@ -26,7 +26,7 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
 5. Uruchom skrypty z folderu script np.
    Dla PostgreSQL
    ```bash
-   ./scripts/import_postgres.sh
+   ./scripts/import_postgres.sh 50K
 6. Wejdź w baze SQL dla MySQL:
    ```bash
    sudo docker exec -it mysql-container mysql -u root -p
