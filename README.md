@@ -42,10 +42,8 @@ Ten projekt umożliwia uruchomienie bazy danych MySQL, MSSQL, PostgreSQL i Oracl
    Dla Oracle
    ```bash
    sudo docker exec -it oracle-container bash
-   sqlplus sys/oracle@localhost:1521/XE as sysdba
    sqlplus sys as sysdba
    password: oracle
-   StrongPassword123!
    ```
 7. W przypadku baz MSSQL musimy ręcznie dodać:
    ```bash
